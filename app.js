@@ -83,7 +83,13 @@ function simulate(timestamp) {
 }
 
 // --- Control event listeners ---
-els.angle.addEventListener(     'input', e => { els.lblAngle.textContent  = e.target.value + '°';    });
+els.angle.addEventListener('input', e => {
+  els.lblAngle.textContent = e.target.value + '°';
+  if (simState && !simState.launched) {
+    simState.angleRad = parseFloat(e.target.value) * Math.PI / 180;
+    drawSimFrame(simCtx, simCanvas, simState);
+  }
+});
 els.initHeight.addEventListener('input', e => { els.lblHeight.textContent = e.target.value + ' m';   });
 els.speed.addEventListener(     'input', e => { els.lblSpeed.textContent  = e.target.value + ' m/s'; });
 els.wind.addEventListener(      'input', e => { els.lblWind.textContent   = e.target.value;           });
@@ -113,6 +119,7 @@ els.launchBtn.addEventListener('click', () => {
     vy: v0 * Math.sin(angleRad),
     g, wind: windVal,
     theme: planets[els.planet.selectedIndex].theme,
+    angleRad,
     launched: true,
   };
 
@@ -129,7 +136,7 @@ els.launchBtn.addEventListener('click', () => {
 els.stopBtn.addEventListener('click', () => {
   if (animId) { cancelAnimationFrame(animId); animId = null; }
   prevTime = null;
-  simState = { ...createInitialState(parseFloat(els.initHeight.value)), theme: planets[els.planet.selectedIndex].theme };
+  simState = { ...createInitialState(parseFloat(els.initHeight.value)), theme: planets[els.planet.selectedIndex].theme, angleRad: parseFloat(els.angle.value) * Math.PI / 180 };
   resetChart(trajChart, parseFloat(els.speed.value), parseFloat(els.initHeight.value),
     parseFloat(els.angle.value) * Math.PI / 180, parseFloat(els.planet.value));
   els.statS.textContent     = 'ready';
@@ -195,6 +202,6 @@ makeDraggable(
 requestAnimationFrame(() => {
   resizeCanvases();
   trajChart = initChart(trajCtx);
-  simState  = { ...createInitialState(3), theme: planets[0].theme };
+  simState  = { ...createInitialState(3), theme: planets[0].theme, angleRad: parseFloat(els.angle.value) * Math.PI / 180 };
   drawSimFrame(simCtx, simCanvas, simState);
 });

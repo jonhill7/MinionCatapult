@@ -253,6 +253,53 @@ function drawBackground(ctx, w, h, camX, camY, groundY, theme) {
   }
 }
 
+function drawLaunchArrow(ctx, x, y, angleRad) {
+  const dx = Math.cos(angleRad);
+  const dy = -Math.sin(angleRad);   // screen Y is flipped
+
+  const x1 = x + dx * 22,  y1 = y + dy * 22;   // start outside minion radius
+  const x2 = x + dx * 75,  y2 = y + dy * 75;   // tip
+
+  const headLen = 11;
+  const headSpread = Math.PI / 6;
+  const shaftAngle = Math.atan2(y2 - y1, x2 - x1);
+
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.55)';
+  ctx.shadowBlur  = 3;
+
+  // dashed shaft
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.strokeStyle = 'rgba(255,255,255,0.88)';
+  ctx.lineWidth   = 2;
+  ctx.setLineDash([5, 3]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // arrowhead
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - headLen * Math.cos(shaftAngle - headSpread),
+             y2 - headLen * Math.sin(shaftAngle - headSpread));
+  ctx.lineTo(x2 - headLen * Math.cos(shaftAngle + headSpread),
+             y2 - headLen * Math.sin(shaftAngle + headSpread));
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(255,255,255,0.88)';
+  ctx.fill();
+
+  // angle label just past the tip
+  const angleDeg = Math.round(angleRad * 180 / Math.PI);
+  ctx.font         = 'bold 12px sans-serif';
+  ctx.fillStyle    = 'rgba(255,255,255,0.95)';
+  ctx.textBaseline = 'middle';
+  ctx.textAlign    = dx >= 0 ? 'left' : 'right';
+  ctx.fillText(angleDeg + '°', x2 + dx * 8, y2 + dy * 8);
+
+  ctx.restore();
+}
+
 /**
  * Renders a complete simulation frame onto the given canvas context.
  * @param {CanvasRenderingContext2D} ctx
@@ -272,6 +319,11 @@ function drawSimFrame(ctx, canvas, state) {
   const catPos   = worldToScreen(0, s.initH, camX, camY, groundY);
   const armAngle = s.launched ? -Math.PI * 0.9 : -Math.PI * 0.15;
   drawCatapult(ctx, catPos.sx, catPos.sy, armAngle);
+
+  // launch angle arrow (idle only)
+  if (!s.launched && s.angleRad != null) {
+    drawLaunchArrow(ctx, catPos.sx, catPos.sy, s.angleRad);
+  }
 
   // trajectory trail
   if (s.trail.length > 1) {
