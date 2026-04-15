@@ -12,20 +12,17 @@ const els = {
   stopBtn:    document.getElementById('stop-btn'),
   planet:     document.getElementById('planet'),
   angle:      document.getElementById('angle'),
-  initHeight: document.getElementById('init-height'),
   speed:      document.getElementById('speed'),
-  wind:       document.getElementById('wind'),
   lblPlanet:  document.getElementById('lbl-planet'),
   lblAngle:   document.getElementById('lbl-angle'),
-  lblHeight:  document.getElementById('lbl-height'),
   lblSpeed:   document.getElementById('lbl-speed'),
-  lblWind:    document.getElementById('lbl-wind'),
   statH:      document.getElementById('stat-h'),
   statV:      document.getElementById('stat-v'),
   statR:      document.getElementById('stat-r'),
   statT:      document.getElementById('stat-t'),
   statMH:     document.getElementById('stat-mh'),
   statS:      document.getElementById('stat-s'),
+  formulaBar: document.getElementById('formula-bar'),
 };
 
 // --- Populate planet select from JSON ---
@@ -83,16 +80,31 @@ function simulate(timestamp) {
 }
 
 // --- Control event listeners ---
+// --- Formula display ---
+function formatCoeff(n) {
+  return (n >= 0 ? '+' : '−') + ' ' + Math.abs(n).toFixed(4);
+}
+function updateFormula() {
+  const g        = parseFloat(els.planet.value);
+  const angleRad = parseFloat(els.angle.value) * Math.PI / 180;
+  const v0       = parseFloat(els.speed.value);
+  const vx       = v0 * Math.cos(angleRad);
+  const vy       = v0 * Math.sin(angleRad);
+  const A        = -g / (2 * vx * vx);
+  const B        = vy / vx;
+  els.formulaBar.textContent =
+    `y(x)  =  ${A.toFixed(4)} x²  ${formatCoeff(B)} x`;
+}
+
 els.angle.addEventListener('input', e => {
   els.lblAngle.textContent = e.target.value + '°';
   if (simState && !simState.launched) {
     simState.angleRad = parseFloat(e.target.value) * Math.PI / 180;
     drawSimFrame(simCtx, simCanvas, simState);
   }
+  updateFormula();
 });
-els.initHeight.addEventListener('input', e => { els.lblHeight.textContent = e.target.value + ' m';   });
-els.speed.addEventListener(     'input', e => { els.lblSpeed.textContent  = e.target.value + ' m/s'; });
-els.wind.addEventListener(      'input', e => { els.lblWind.textContent   = e.target.value;           });
+els.speed.addEventListener('input', e => { els.lblSpeed.textContent = e.target.value + ' m/s'; updateFormula(); });
 els.planet.addEventListener('change', e => {
   const p = planets[e.target.selectedIndex];
   els.lblPlanet.textContent = p.name;
@@ -100,6 +112,7 @@ els.planet.addEventListener('change', e => {
     simState.theme = p.theme;
     drawSimFrame(simCtx, simCanvas, simState);
   }
+  updateFormula();
 });
 
 els.launchBtn.addEventListener('click', () => {
@@ -110,14 +123,12 @@ els.launchBtn.addEventListener('click', () => {
   const angleDeg = parseFloat(els.angle.value);
   const angleRad = angleDeg * Math.PI / 180;
   const v0       = parseFloat(els.speed.value);
-  const h0       = parseFloat(els.initHeight.value);
-  const windVal  = parseFloat(els.wind.value);
-
+  const h0       = 0;
   simState = {
     ...createInitialState(h0),
     vx: v0 * Math.cos(angleRad),
     vy: v0 * Math.sin(angleRad),
-    g, wind: windVal,
+    g,
     theme: planets[els.planet.selectedIndex].theme,
     angleRad,
     launched: true,
@@ -136,8 +147,8 @@ els.launchBtn.addEventListener('click', () => {
 els.stopBtn.addEventListener('click', () => {
   if (animId) { cancelAnimationFrame(animId); animId = null; }
   prevTime = null;
-  simState = { ...createInitialState(parseFloat(els.initHeight.value)), theme: planets[els.planet.selectedIndex].theme, angleRad: parseFloat(els.angle.value) * Math.PI / 180 };
-  resetChart(trajChart, parseFloat(els.speed.value), parseFloat(els.initHeight.value),
+  simState = { ...createInitialState(0), theme: planets[els.planet.selectedIndex].theme, angleRad: parseFloat(els.angle.value) * Math.PI / 180 };
+  resetChart(trajChart, parseFloat(els.speed.value), 0,
     parseFloat(els.angle.value) * Math.PI / 180, parseFloat(els.planet.value));
   els.statS.textContent     = 'ready';
   els.statS.style.color     = '#e86b2a';
@@ -202,6 +213,7 @@ makeDraggable(
 requestAnimationFrame(() => {
   resizeCanvases();
   trajChart = initChart(trajCtx);
-  simState  = { ...createInitialState(3), theme: planets[0].theme, angleRad: parseFloat(els.angle.value) * Math.PI / 180 };
+  simState  = { ...createInitialState(0), theme: planets[0].theme, angleRad: parseFloat(els.angle.value) * Math.PI / 180 };
   drawSimFrame(simCtx, simCanvas, simState);
+  updateFormula();
 });

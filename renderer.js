@@ -1,7 +1,7 @@
 // All canvas drawing. No DOM queries — takes ctx, canvas, and state as arguments.
 
-function worldToScreen(wx, wy, camX, camY, groundY) {
-  return { sx: wx * 5 - camX, sy: groundY - camY - wy * 10 };
+function worldToScreen(wx, wy, camX, camY, groundY, scale) {
+  return { sx: wx * scale - camX, sy: groundY - camY - wy * 10 };
 }
 
 function getExpression(vy, launched, landed) {
@@ -119,28 +119,34 @@ function drawCatapult(ctx, x, y, armAngle) {
   ctx.restore();
 }
 
-function drawSkyObjects(ctx, w, h, camX, theme) {
-  const scroll = (offset, factor) =>
+function drawSkyObjects(ctx, w, h, camX, camY, theme) {
+  // hScroll: horizontal parallax wrap (same as before)
+  const hScroll = (offset, factor) =>
     ((offset - camX * factor) % (w + 300) + w + 300) % (w + 300) - 100;
+  // vShift: vertical parallax — camY ≤ 0, so -camY ≥ 0; distant objects drift
+  // down more slowly than the ground does as the camera rises.
+  const vShift = factor => -camY * factor;
 
   switch (theme.skyObjects) {
 
     case 'clouds': {
+      const vy = vShift(0.12);
       ctx.fillStyle = 'rgba(255,255,255,0.8)';
       [0, 180, 360].forEach(o => {
-        const cx = scroll(o, 0.2);
-        ctx.beginPath(); ctx.arc(cx,      40,  25, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(cx + 30, 35,  20, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(cx + 55, 40,  22, 0, Math.PI * 2); ctx.fill();
+        const cx = hScroll(o, 0.2);
+        const cy = 40 + vy;
+        ctx.beginPath(); ctx.arc(cx,      cy,      25, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx + 30, cy -  5, 20, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx + 55, cy,      22, 0, Math.PI * 2); ctx.fill();
       });
       break;
     }
 
     case 'dust': {
-      // Flat reddish dust wisps drifting slowly
+      // Low-altitude wisps — more vertical shift than high clouds
       [0, 220, 440].forEach((o, i) => {
-        const cx = scroll(o, 0.15);
-        const cy = 52 + i * 18;
+        const cx = hScroll(o, 0.15);
+        const cy = 52 + i * 18 + vShift(0.08);
         ctx.save();
         ctx.translate(cx, cy);
         ctx.scale(2.8, 0.5);
@@ -153,65 +159,81 @@ function drawSkyObjects(ctx, w, h, camX, theme) {
     }
 
     case 'bands': {
-      // Jupiter atmospheric band streaks — fixed, they span the whole sky
+      // Jupiter atmospheric bands — full-width stripes that shift down slowly
+      const vy = vShift(0.05);
       [
         [0.10, 0.08, 'rgba(155, 85, 25, 0.45)'],
         [0.26, 0.06, 'rgba(195,135, 55, 0.35)'],
         [0.40, 0.10, 'rgba(135, 65, 18, 0.42)'],
       ].forEach(([yFrac, hFrac, col]) => {
         ctx.fillStyle = col;
-        ctx.fillRect(0, h * yFrac, w, h * hFrac);
+        ctx.fillRect(0, h * yFrac + vy, w, h * hFrac);
       });
       break;
     }
 
     case 'stars': {
+      const skyH = h * 0.72;
       ctx.fillStyle = 'rgba(255,255,255,0.9)';
-      for (let i = 0; i < 70; i++) {
-        const x = (i * 137.508) % w;
-        const y = (i * 97.314)  % (h * 0.72);
+      for (let i = 0; i < 130; i++) {
+        const hx    = Math.abs((Math.sin(i * 127.1 + 0.1) * 43758.5453) % 1);
+        const hy    = Math.abs((Math.sin(i * 311.7 + 0.2) * 43758.5453) % 1);
+        const hs    = Math.abs((Math.sin(i * 743.3 + 0.3) * 43758.5453) % 1);
+        const baseX = hx * w;
+        const baseY = hy * skyH;
+        const x     = ((baseX - camX * 0.05) % w    + w)    % w;
+        const y     = ((baseY - camY * 0.03) % skyH + skyH) % skyH;
+        const r     = hs < 0.10 ? 1.6 : hs < 0.35 ? 1.0 : 0.65;
         ctx.beginPath();
-        ctx.arc(x, y, i % 4 === 0 ? 1.5 : 0.8, 0, Math.PI * 2);
+        ctx.arc(x, y, r, 0, Math.PI * 2);
         ctx.fill();
       }
       break;
     }
 
     case 'venusClouds': {
-      // Thick yellowish-orange sulphuric acid clouds
+      const vy = vShift(0.12);
       [0, 170, 340].forEach(o => {
-        const cx = scroll(o, 0.1);
+        const cx = hScroll(o, 0.1);
+        const cy = 35 + vy;
         ctx.fillStyle = 'rgba(210,155,40,0.65)';
-        ctx.beginPath(); ctx.arc(cx,      35,  30, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(cx + 38, 28,  24, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(cx + 68, 36,  26, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx,      cy,      30, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx + 38, cy -  7, 24, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx + 68, cy +  1, 26, 0, Math.PI * 2); ctx.fill();
       });
       break;
     }
 
     case 'iceClouds': {
-      // Blue-white methane ice wisps
+      const vy = vShift(0.10);
       [0, 200, 400].forEach(o => {
-        const cx = scroll(o, 0.25);
+        const cx = hScroll(o, 0.25);
+        const cy = 42 + vy;
         ctx.fillStyle = 'rgba(190,220,255,0.6)';
-        ctx.beginPath(); ctx.arc(cx,      42,  22, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(cx + 28, 35,  16, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(cx + 50, 43,  19, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx,      cy,      22, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx + 28, cy -  7, 16, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx + 50, cy +  1, 19, 0, Math.PI * 2); ctx.fill();
       });
       break;
     }
 
     case 'starsWithMoon': {
-      // Stars
+      const skyH = h * 0.72;
       ctx.fillStyle = 'rgba(255,255,255,0.85)';
-      for (let i = 0; i < 70; i++) {
-        const x = (i * 137.508) % w;
-        const y = (i * 97.314)  % (h * 0.72);
+      for (let i = 0; i < 130; i++) {
+        const hx    = Math.abs((Math.sin(i * 127.1 + 0.1) * 43758.5453) % 1);
+        const hy    = Math.abs((Math.sin(i * 311.7 + 0.2) * 43758.5453) % 1);
+        const hs    = Math.abs((Math.sin(i * 743.3 + 0.3) * 43758.5453) % 1);
+        const baseX = hx * w;
+        const baseY = hy * skyH;
+        const x     = ((baseX - camX * 0.05) % w    + w)    % w;
+        const y     = ((baseY - camY * 0.03) % skyH + skyH) % skyH;
+        const r     = hs < 0.10 ? 1.6 : hs < 0.35 ? 1.0 : 0.65;
         ctx.beginPath();
-        ctx.arc(x, y, i % 4 === 0 ? 1.5 : 0.8, 0, Math.PI * 2);
+        ctx.arc(x, y, r, 0, Math.PI * 2);
         ctx.fill();
       }
-      // Charon — large grey moon fixed in the upper-right sky
+      // Charon — tidally locked, stationary in Pluto's sky
       const cx = w * 0.78, cy = h * 0.15;
       ctx.beginPath(); ctx.arc(cx, cy, 26, 0, Math.PI * 2);
       ctx.fillStyle   = 'rgba(155,135,125,0.9)';
@@ -224,7 +246,7 @@ function drawSkyObjects(ctx, w, h, camX, theme) {
   }
 }
 
-function drawBackground(ctx, w, h, camX, camY, groundY, theme) {
+function drawBackground(ctx, w, h, camX, camY, groundY, theme, scale) {
   const t = theme || { sky: '#87CEEB', ground: '#4CAF50', soil: '#8B6914', skyObjects: 'clouds' };
 
   // sky
@@ -232,7 +254,7 @@ function drawBackground(ctx, w, h, camX, camY, groundY, theme) {
   ctx.fillRect(0, 0, w, h);
 
   // sky objects
-  drawSkyObjects(ctx, w, h, camX, t);
+  drawSkyObjects(ctx, w, h, camX, camY, t);
 
   // ground surface + soil
   const screenGroundY = groundY - camY;
@@ -245,7 +267,7 @@ function drawBackground(ctx, w, h, camX, camY, groundY, theme) {
   ctx.fillStyle = 'rgba(0,0,0,0.3)';
   ctx.font = '11px sans-serif';
   for (let d = 0; d < 2000; d += 20) {
-    const sx = d * 5 - camX;
+    const sx = d * scale - camX;
     if (sx > -10 && sx < w + 10) {
       ctx.fillRect(sx, screenGroundY, 2, 8);
       if (d % 40 === 0) ctx.fillText(d + 'm', sx - 10, screenGroundY + 20);
@@ -309,14 +331,15 @@ function drawLaunchArrow(ctx, x, y, angleRad) {
 function drawSimFrame(ctx, canvas, state) {
   const w = canvas.width, h = canvas.height;
   const groundY = h * 0.75;
+  const scale = w / 50;
   const s = state;
-  const camX = s.launched ? Math.max(0, s.wx * 5 - w / 2) : 0;
+  const camX = s.wx * scale - w / 2;
   const camY = s.launched ? Math.min(0, -(Math.max(0, s.wy * 10 - h * 0.4))) : 0;
 
-  drawBackground(ctx, w, h, camX, camY, groundY, s.theme);
+  drawBackground(ctx, w, h, camX, camY, groundY, s.theme, scale);
 
   // catapult
-  const catPos   = worldToScreen(0, s.initH, camX, camY, groundY);
+  const catPos   = worldToScreen(0, s.initH, camX, camY, groundY, scale);
   const armAngle = s.launched ? -Math.PI * 0.9 : -Math.PI * 0.15;
   drawCatapult(ctx, catPos.sx, catPos.sy, armAngle);
 
@@ -329,7 +352,7 @@ function drawSimFrame(ctx, canvas, state) {
   if (s.trail.length > 1) {
     ctx.beginPath();
     s.trail.forEach((pt, i) => {
-      const sp = worldToScreen(pt.x, pt.y, camX, camY, groundY);
+      const sp = worldToScreen(pt.x, pt.y, camX, camY, groundY, scale);
       if (i === 0) ctx.moveTo(sp.sx, sp.sy);
       else         ctx.lineTo(sp.sx, sp.sy);
     });
@@ -342,7 +365,7 @@ function drawSimFrame(ctx, canvas, state) {
 
   // landing marker
   if (s.landed && s.landX !== null) {
-    const lp = worldToScreen(s.landX, 0, camX, camY, groundY);
+    const lp = worldToScreen(s.landX, 0, camX, camY, groundY, scale);
     ctx.fillStyle = '#e82a2a';
     ctx.font = 'bold 16px sans-serif';
     ctx.fillText('X', lp.sx - 6, lp.sy + 5);
@@ -353,7 +376,7 @@ function drawSimFrame(ctx, canvas, state) {
 
   // minion
   if (s.launched || !s.landed) {
-    const mp       = worldToScreen(s.wx, s.wy, camX, camY, groundY);
+    const mp       = worldToScreen(s.wx, s.wy, camX, camY, groundY, scale);
     const velAngle = s.launched ? Math.atan2(-s.vy, s.vx) : -Math.PI / 4;
     const expr     = getExpression(s.vy, s.launched, s.landed);
     drawMinion(ctx, mp.sx, mp.sy, 18, expr, s.launched ? velAngle * 0.3 : 0);
