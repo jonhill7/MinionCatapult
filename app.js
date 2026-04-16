@@ -37,6 +37,8 @@ planets.forEach(p => {
 function resizeCanvases() {
   simCanvas.width   = els.simPanel.clientWidth;
   simCanvas.height  = els.simPanel.clientHeight;
+  trajCanvas.width  = 0;
+  trajCanvas.height = 0;
   trajCanvas.width  = els.chartArea.clientWidth;
   trajCanvas.height = els.chartArea.clientHeight;
 }
@@ -93,7 +95,7 @@ function updateFormula() {
   const A        = -g / (2 * vx * vx);
   const B        = vy / vx;
   els.formulaBar.textContent =
-    `y(x)  =  ${A.toFixed(4)} x²  ${formatCoeff(B)} x`;
+    `h  =  ${A.toFixed(4)} t²  ${formatCoeff(B)} t`;
 }
 
 els.angle.addEventListener('input', e => {
@@ -104,7 +106,14 @@ els.angle.addEventListener('input', e => {
   }
   updateFormula();
 });
-els.speed.addEventListener('input', e => { els.lblSpeed.textContent = e.target.value + ' m/s'; updateFormula(); });
+els.speed.addEventListener('input', e => {
+  els.lblSpeed.textContent = e.target.value + ' m/s';
+  if (simState && !simState.launched) {
+    simState.speed = parseFloat(e.target.value);
+    drawSimFrame(simCtx, simCanvas, simState);
+  }
+  updateFormula();
+});
 els.planet.addEventListener('change', e => {
   const p = planets[e.target.selectedIndex];
   els.lblPlanet.textContent = p.name;
@@ -147,7 +156,7 @@ els.launchBtn.addEventListener('click', () => {
 els.stopBtn.addEventListener('click', () => {
   if (animId) { cancelAnimationFrame(animId); animId = null; }
   prevTime = null;
-  simState = { ...createInitialState(0), theme: planets[els.planet.selectedIndex].theme, angleRad: parseFloat(els.angle.value) * Math.PI / 180 };
+  simState = { ...createInitialState(0), theme: planets[els.planet.selectedIndex].theme, angleRad: parseFloat(els.angle.value) * Math.PI / 180, speed: parseFloat(els.speed.value) };
   resetChart(trajChart, parseFloat(els.speed.value), 0,
     parseFloat(els.angle.value) * Math.PI / 180, parseFloat(els.planet.value));
   els.statS.textContent     = 'ready';
@@ -213,7 +222,7 @@ makeDraggable(
 requestAnimationFrame(() => {
   resizeCanvases();
   trajChart = initChart(trajCtx);
-  simState  = { ...createInitialState(0), theme: planets[0].theme, angleRad: parseFloat(els.angle.value) * Math.PI / 180 };
+  simState  = { ...createInitialState(0), theme: planets[0].theme, angleRad: parseFloat(els.angle.value) * Math.PI / 180, speed: parseFloat(els.speed.value) };
   drawSimFrame(simCtx, simCanvas, simState);
   updateFormula();
 });

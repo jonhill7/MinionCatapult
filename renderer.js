@@ -275,12 +275,13 @@ function drawBackground(ctx, w, h, camX, camY, groundY, theme, scale) {
   }
 }
 
-function drawLaunchArrow(ctx, x, y, angleRad) {
+function drawLaunchArrow(ctx, x, y, angleRad, speed) {
   const dx = Math.cos(angleRad);
   const dy = -Math.sin(angleRad);   // screen Y is flipped
 
+  const tipDist = Math.min(30 + (speed || 25) * 1.8, 130);
   const x1 = x + dx * 22,  y1 = y + dy * 22;   // start outside minion radius
-  const x2 = x + dx * 75,  y2 = y + dy * 75;   // tip
+  const x2 = x + dx * tipDist,  y2 = y + dy * tipDist;   // tip
 
   const headLen = 11;
   const headSpread = Math.PI / 6;
@@ -345,7 +346,7 @@ function drawSimFrame(ctx, canvas, state) {
 
   // launch angle arrow (idle only)
   if (!s.launched && s.angleRad != null) {
-    drawLaunchArrow(ctx, catPos.sx, catPos.sy, s.angleRad);
+    drawLaunchArrow(ctx, catPos.sx, catPos.sy, s.angleRad, s.speed);
   }
 
   // trajectory trail

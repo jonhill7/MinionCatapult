@@ -56,10 +56,10 @@ function initChart(ctx) {
 function resetChart(chart, v0, h0, angleRad, g) {
   chart.data.datasets[0].data = [];
   chart.data.datasets[1].data = [];
-  const maxRange  = (v0 * v0 / g) * 2;
+  const maxRange  = (v0 * v0 / g) * Math.sin(2*angleRad);
   const maxHeight = h0 + (v0 * Math.sin(angleRad)) ** 2 / (2 * g);
-  chart.options.scales.x.max = Math.ceil(maxRange  * 1.2);
-  chart.options.scales.y.max = Math.ceil(maxHeight * 1.3);
+  chart.options.scales.x.max = Math.ceil(maxRange*1.2  / 10)*10;
+  chart.options.scales.y.max = Math.ceil(maxHeight * (2 - angleRad*4/6.28));
   chart.update('none');
 }
 

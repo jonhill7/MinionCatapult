@@ -1,35 +1,5 @@
 
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--font-sans); }
-#app { display: grid; grid-template-rows: auto 6px auto; gap: 0; }
-#top { display: grid; grid-template-columns: minmax(0, 1fr) 6px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 0; height: 420px; overflow: hidden; }
-.divider { background: var(--color-border-tertiary, #ccc); transition: background 0.15s; }
-.divider:hover, .divider.dragging { background: #e86b2a; }
-#v-divider { cursor: col-resize; border-top: 0.5px solid var(--color-border-tertiary); border-bottom: 0.5px solid var(--color-border-tertiary); }
-#h-divider { cursor: row-resize; border-left: 0.5px solid var(--color-border-tertiary); border-right: 0.5px solid var(--color-border-tertiary); }
-#sim-panel { background: #87CEEB; position: relative; overflow: hidden; border-radius: var(--border-radius-lg) 0 0 0; border: 0.5px solid var(--color-border-tertiary); }
-#right-panel { display: flex; flex-direction: column; gap: 0; border-radius: 0 var(--border-radius-lg) 0 0; border: 0.5px solid var(--color-border-tertiary); border-left: none; background: var(--color-background-primary); }
-#chart-area { flex: 1; padding: 10px; }
-#stats-area { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; padding: 10px; border-top: 0.5px solid var(--color-border-tertiary); }
-.stat-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 8px 10px; text-align: center; }
-.stat-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 2px; }
-.stat-value { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
-#bottom-panel { background: var(--color-background-primary); border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); border-top: none; padding: 12px 16px; display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
-#formula-bar { flex-basis: 100%; margin-top: 4px; padding-top: 8px; border-top: 0.5px solid var(--color-border-tertiary); font-size: 13px; font-family: monospace; color: var(--color-text-secondary); letter-spacing: 0.02em; }
-.param-group { display: flex; flex-direction: column; gap: 4px; min-width: 120px; flex: 1; }
-.param-label { font-size: 11px; color: var(--color-text-secondary); display: flex; justify-content: space-between; }
-.param-label span { font-weight: 500; color: var(--color-text-primary); }
-input[type=range] { width: 100%; }
-select { width: 100%; font-size: 13px; padding: 4px 6px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); background: var(--color-background-primary); color: var(--color-text-primary); }
-#launch-btn { background: #e86b2a; color: white; border: none; border-radius: var(--border-radius-md); padding: 10px 20px; font-size: 14px; font-weight: 500; cursor: pointer; min-width: 100px; align-self: flex-end; }
-#launch-btn:hover { background: #c95a1e; }
-#launch-btn:active { transform: scale(0.97); }
-#stop-btn { background: #c0392b; color: white; border: none; border-radius: var(--border-radius-md); padding: 10px 20px; font-size: 14px; font-weight: 500; cursor: pointer; min-width: 100px; align-self: flex-end; display: none; }
-#stop-btn:hover { background: #a93226; }
-#stop-btn:active { transform: scale(0.97); }
-canvas { display: block; }
-</style>
+<link rel="stylesheet" href="style.css">
 
 <div id="app">
   <div id="top">
