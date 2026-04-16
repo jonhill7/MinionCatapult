@@ -29,9 +29,14 @@ function updatePhysics(state, dt) {
   if (state.trail.length > 300) state.trail.shift();
 
   if (state.wy <= 0 && state.t > 0.1) {
-    state.wy    = 0;
-    state.landed = true;
-    state.landX  = state.wx;
+    // Interpolate to find x exactly when wy crossed zero, rather than
+    // using the post-step wx which overshoots by vx * (dt - t_cross).
+    const vyPrev   = state.vy + state.g * dt;   // vy used for position update (before gravity was applied)
+    const dtExtra  = state.wy / vyPrev;          // time past landing within this step (> 0: both terms negative)
+    state.wx      -= state.vx * dtExtra;
+    state.wy       = 0;
+    state.landed   = true;
+    state.landX    = state.wx;
     return true;
   }
   return false;
