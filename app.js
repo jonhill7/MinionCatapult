@@ -119,6 +119,7 @@ els.planet.addEventListener('change', e => {
   els.lblPlanet.textContent = p.name;
   if (simState && !simState.launched) {
     simState.theme = p.theme;
+    simState.planet = p.name;
     drawSimFrame(simCtx, simCanvas, simState);
   }
   updateFormula();
@@ -139,6 +140,7 @@ els.launchBtn.addEventListener('click', () => {
     vy: v0 * Math.sin(angleRad),
     g,
     theme: planets[els.planet.selectedIndex].theme,
+    planet: planets[els.planet.selectedIndex].name,
     angleRad,
     launched: true,
   };
@@ -156,7 +158,7 @@ els.launchBtn.addEventListener('click', () => {
 els.stopBtn.addEventListener('click', () => {
   if (animId) { cancelAnimationFrame(animId); animId = null; }
   prevTime = null;
-  simState = { ...createInitialState(0), theme: planets[els.planet.selectedIndex].theme, angleRad: parseFloat(els.angle.value) * Math.PI / 180, speed: parseFloat(els.speed.value) };
+  simState = { ...createInitialState(0), theme: planets[els.planet.selectedIndex].theme, planet: planets[els.planet.selectedIndex].name, angleRad: parseFloat(els.angle.value) * Math.PI / 180, speed: parseFloat(els.speed.value) };
   resetChart(trajChart, parseFloat(els.speed.value), 0,
     parseFloat(els.angle.value) * Math.PI / 180, parseFloat(els.planet.value));
   els.statS.textContent     = 'ready';
@@ -222,7 +224,7 @@ makeDraggable(
 requestAnimationFrame(() => {
   resizeCanvases();
   trajChart = initChart(trajCtx);
-  simState  = { ...createInitialState(0), theme: planets[0].theme, angleRad: parseFloat(els.angle.value) * Math.PI / 180, speed: parseFloat(els.speed.value) };
+  simState  = { ...createInitialState(0), theme: planets[0].theme, planet: planets[0].name, angleRad: parseFloat(els.angle.value) * Math.PI / 180, speed: parseFloat(els.speed.value) };
   drawSimFrame(simCtx, simCanvas, simState);
   updateFormula();
 });
