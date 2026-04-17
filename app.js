@@ -10,6 +10,7 @@ const els = {
   chartArea:  document.getElementById('chart-area'),
   launchBtn:  document.getElementById('launch-btn'),
   stopBtn:    document.getElementById('stop-btn'),
+  resetBtn:   document.getElementById('reset-btn'),
   planet:     document.getElementById('planet'),
   angle:      document.getElementById('angle'),
   speed:      document.getElementById('speed'),
@@ -69,7 +70,7 @@ function simulate(timestamp) {
     if (justLanded) {
       els.statS.textContent      = 'landed!';
       els.statS.style.color      = '#e82a2a';
-      els.launchBtn.style.display = 'inline-block';
+      els.resetBtn.style.display  = 'inline-block';
       els.stopBtn.style.display   = 'none';
     }
   }
@@ -155,18 +156,22 @@ els.launchBtn.addEventListener('click', () => {
   animId = requestAnimationFrame(simulate);
 });
 
-els.stopBtn.addEventListener('click', () => {
+function doReset() {
   if (animId) { cancelAnimationFrame(animId); animId = null; }
   prevTime = null;
   simState = { ...createInitialState(0), theme: planets[els.planet.selectedIndex].theme, planet: planets[els.planet.selectedIndex].name, angleRad: parseFloat(els.angle.value) * Math.PI / 180, speed: parseFloat(els.speed.value) };
   resetChart(trajChart, parseFloat(els.speed.value), 0,
     parseFloat(els.angle.value) * Math.PI / 180, parseFloat(els.planet.value));
-  els.statS.textContent     = 'ready';
-  els.statS.style.color     = '#e86b2a';
-  els.launchBtn.style.display = 'inline-block';
-  els.stopBtn.style.display   = 'none';
+  els.statS.textContent       = 'ready';
+  els.statS.style.color       = '#e86b2a';
+  els.launchBtn.style.display  = 'inline-block';
+  els.stopBtn.style.display    = 'none';
+  els.resetBtn.style.display   = 'none';
   drawSimFrame(simCtx, simCanvas, simState);
-});
+}
+
+els.stopBtn.addEventListener('click', doReset);
+els.resetBtn.addEventListener('click', doReset);
 
 window.addEventListener('resize', () => {
   resizeCanvases();
