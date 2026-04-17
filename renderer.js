@@ -135,7 +135,7 @@ function drawNewtonMinion(ctx, x, y, size, expr = 'idle') {
   // dark coat (instead of overalls)
   ctx.beginPath();
   ctx.arc(0, size * 0.3, size * 0.7, 0.1, Math.PI - 0.1);
-  ctx.fillStyle = '#1c1c2e';
+  ctx.fillStyle = '#4466cc';
   ctx.fill();
 
   // wig front (sits over the top portion of the face)
