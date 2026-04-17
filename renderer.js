@@ -106,7 +106,8 @@ function drawMinion(ctx, x, y, size, expr, angle, spaceSuit) {
   ctx.restore();
 }
 
-function drawNewtonMinion(ctx, x, y, size) {
+// expr: 'idle' | 'excited' | 'worried' | 'aha'
+function drawNewtonMinion(ctx, x, y, size, expr = 'idle') {
   ctx.save();
   ctx.translate(x, y);
 
@@ -166,42 +167,65 @@ function drawNewtonMinion(ctx, x, y, size) {
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
-  // pupil (looking slightly up, as if pondering)
+  // pupil — position and size vary by expression
+  let px = size * 0.04, py = -size * 0.1, pr = size * 0.18;
+  if (expr === 'excited') { px =  size * 0.04; py = -size * 0.16; pr = size * 0.21; }
+  if (expr === 'worried')  { px = -size * 0.06; py = -size * 0.02; pr = size * 0.16; }
+  if (expr === 'aha')      { px =  size * 0.08; py = -size * 0.14; pr = size * 0.22; }
   ctx.beginPath();
-  ctx.arc(size * 0.04, -size * 0.1, size * 0.18, 0, Math.PI * 2);
+  ctx.arc(px, py, pr, 0, Math.PI * 2);
   ctx.fillStyle = '#111';
   ctx.fill();
   ctx.beginPath();
-  ctx.arc(size * 0.1, -size * 0.16, size * 0.05, 0, Math.PI * 2);
+  ctx.arc(px + size * 0.06, py - size * 0.06, size * 0.05, 0, Math.PI * 2);
   ctx.fillStyle = 'white';
   ctx.fill();
 
-  // mouth (slight knowing smile)
+  // mouth — shape varies by expression
   ctx.beginPath();
-  ctx.arc(0, size * 0.33, size * 0.18, 0.15, Math.PI - 0.15);
-  ctx.strokeStyle = '#333';
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
+  if (expr === 'excited') {
+    // big open grin
+    ctx.arc(0, size * 0.3, size * 0.25, 0.1, Math.PI - 0.1);
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5; ctx.stroke();
+  } else if (expr === 'worried') {
+    // downturned frown
+    ctx.arc(0, size * 0.48, size * 0.2, Math.PI + 0.2, -0.2);
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5; ctx.stroke();
+  } else if (expr === 'aha') {
+    // wide-open "eureka!" mouth
+    ctx.arc(0, size * 0.32, size * 0.22, 0, Math.PI * 2);
+    ctx.fillStyle = '#333'; ctx.fill();
+  } else {
+    // idle: slight knowing smile
+    ctx.arc(0, size * 0.33, size * 0.18, 0.15, Math.PI - 0.15);
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5; ctx.stroke();
+  }
 
-  // apple resting on top of wig
-  const ax = size * 0.42, ay = -size * 1.18;
+  // apple — lower right corner of canvas
+  const ax = size * 1.35, ay = size * 0.95;
+  const ar = size * 0.6;
   ctx.beginPath();
-  ctx.arc(ax, ay, size * 0.17, 0, Math.PI * 2);
+  ctx.arc(ax, ay, ar, 0, Math.PI * 2);
   ctx.fillStyle = '#dd2222';
   ctx.fill();
   ctx.strokeStyle = '#aa1111';
-  ctx.lineWidth = 1;
+  ctx.lineWidth = 1.5;
   ctx.stroke();
+  // highlight
+  ctx.beginPath();
+  ctx.arc(ax - ar * 0.3, ay - ar * 0.35, ar * 0.22, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.fill();
   // stem
   ctx.beginPath();
-  ctx.moveTo(ax, ay - size * 0.17);
-  ctx.quadraticCurveTo(ax + size * 0.07, ay - size * 0.32, ax + size * 0.03, ay - size * 0.36);
+  ctx.moveTo(ax, ay - ar);
+  ctx.quadraticCurveTo(ax + ar * 0.35, ay - ar * 1.5, ax + ar * 0.1, ay - ar * 1.65);
   ctx.strokeStyle = '#553300';
-  ctx.lineWidth = 1.5;
+  ctx.lineWidth = 2;
   ctx.stroke();
   // leaf
   ctx.beginPath();
-  ctx.ellipse(ax + size * 0.13, ay - size * 0.28, size * 0.1, size * 0.055, 0.6, 0, Math.PI * 2);
+  ctx.ellipse(ax + ar * 0.45, ay - ar * 1.35, ar * 0.32, ar * 0.16, 0.7, 0, Math.PI * 2);
   ctx.fillStyle = '#339933';
   ctx.fill();
 

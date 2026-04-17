@@ -55,10 +55,23 @@ function updateStats(state) {
 }
 
 // --- Animation loop ---
-let trajChart = null;
-let animId    = null;
-let simState  = null;
-let prevTime  = null;
+let trajChart  = null;
+let animId     = null;
+let simState   = null;
+let prevTime   = null;
+let newtonCtx  = null;
+
+function getNewtonExpr(state) {
+  if (!state.launched)  return 'idle';
+  if (state.landed)     return 'aha';
+  return state.vy > 2 ? 'excited' : 'worried';
+}
+
+function redrawNewton(state) {
+  if (!newtonCtx) return;
+  newtonCtx.clearRect(0, 0, 80, 90);
+  drawNewtonMinion(newtonCtx, 40, 62, 18, getNewtonExpr(state));
+}
 
 function simulate(timestamp) {
   if (!prevTime) prevTime = timestamp;
@@ -78,6 +91,7 @@ function simulate(timestamp) {
   updateStats(simState);
   updateChart(trajChart, simState);
   drawSimFrame(simCtx, simCanvas, simState);
+  redrawNewton(simState);
 
   if (!simState.landed) animId = requestAnimationFrame(simulate);
 }
@@ -153,6 +167,7 @@ els.launchBtn.addEventListener('click', () => {
   els.launchBtn.style.display = 'none';
   els.stopBtn.style.display  = 'inline-block';
 
+  redrawNewton(simState);
   animId = requestAnimationFrame(simulate);
 });
 
@@ -168,6 +183,7 @@ function doReset() {
   els.stopBtn.style.display    = 'none';
   els.resetBtn.style.display   = 'none';
   drawSimFrame(simCtx, simCanvas, simState);
+  redrawNewton(simState);
 }
 
 els.stopBtn.addEventListener('click', doReset);
@@ -232,6 +248,6 @@ requestAnimationFrame(() => {
   simState  = { ...createInitialState(0), theme: planets[0].theme, planet: planets[0].name, angleRad: parseFloat(els.angle.value) * Math.PI / 180, speed: parseFloat(els.speed.value) };
   drawSimFrame(simCtx, simCanvas, simState);
   updateFormula();
-  const newtonCtx = document.getElementById('newton-canvas').getContext('2d');
-  drawNewtonMinion(newtonCtx, 40, 62, 18);
+  newtonCtx = document.getElementById('newton-canvas').getContext('2d');
+  redrawNewton(simState);
 });
