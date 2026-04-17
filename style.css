@@ -26,4 +26,7 @@ select { width: 100%; font-size: 13px; padding: 4px 6px; border: 0.5px solid var
 #stop-btn { background: #c0392b; color: white; border: none; border-radius: var(--border-radius-md); padding: 10px 20px; font-size: 14px; font-weight: 500; cursor: pointer; min-width: 100px; align-self: flex-end; display: none; }
 #stop-btn:hover { background: #a93226; }
 #stop-btn:active { transform: scale(0.97); }
+#reset-btn { background: #2a7ae8; color: white; border: none; border-radius: var(--border-radius-md); padding: 10px 20px; font-size: 14px; font-weight: 500; cursor: pointer; min-width: 100px; align-self: flex-end; display: none; }
+#reset-btn:hover { background: #1e5fc9; }
+#reset-btn:active { transform: scale(0.97); }
 canvas { display: block; }

@@ -96,7 +96,7 @@ function updateFormula() {
   const A        = -g / (2 * vx * vx);
   const B        = vy / vx;
   els.formulaBar.textContent =
-    `y  =  ${A.toFixed(4)} x²  ${formatCoeff(B)} x`;
+    `h  =  ${A.toFixed(4)} d²  ${formatCoeff(B)} d`;
 }
 
 els.angle.addEventListener('input', e => {
