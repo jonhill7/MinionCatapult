@@ -184,20 +184,20 @@ function drawNewtonMinion(ctx, x, y, size, expr = 'idle') {
   // mouth — shape varies by expression
   ctx.beginPath();
   if (expr === 'excited') {
-    // big open grin
-    ctx.arc(0, size * 0.3, size * 0.25, 0.1, Math.PI - 0.1);
-    ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5; ctx.stroke();
+    // medium smile
+    ctx.arc(0, size * 0.32, size * 0.22, 0.08, Math.PI - 0.08);
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.stroke();
   } else if (expr === 'worried') {
-    // downturned frown
-    ctx.arc(0, size * 0.48, size * 0.2, Math.PI + 0.2, -0.2);
-    ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5; ctx.stroke();
+    // frown: center sits below the arc so it curves upward on screen
+    ctx.arc(0, size * 0.50, size * 0.18, Math.PI, 0);
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.stroke();
   } else if (expr === 'aha') {
-    // wide-open "eureka!" mouth
-    ctx.arc(0, size * 0.32, size * 0.22, 0, Math.PI * 2);
-    ctx.fillStyle = '#333'; ctx.fill();
+    // huge eureka grin
+    ctx.arc(0, size * 0.27, size * 0.28, 0.02, Math.PI - 0.02);
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 2.5; ctx.stroke();
   } else {
-    // idle: slight knowing smile
-    ctx.arc(0, size * 0.33, size * 0.18, 0.15, Math.PI - 0.15);
+    // idle: small knowing smile
+    ctx.arc(0, size * 0.38, size * 0.15, 0.1, Math.PI - 0.1);
     ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5; ctx.stroke();
   }
 
