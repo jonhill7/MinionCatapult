@@ -15,173 +15,92 @@ function drawMinion(ctx, x, y, size, expr, angle, spaceSuit) {
   ctx.translate(x, y);
   ctx.rotate(angle);
 
-  if (spaceSuit) {
-    // body (white suit)
-    ctx.beginPath();
-    ctx.arc(0, 0, size, 0, Math.PI * 2);
-    ctx.fillStyle = '#e8e8e8';
-    ctx.fill();
-    ctx.strokeStyle = '#aaa';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
+  // body
+  ctx.beginPath();
+  ctx.arc(0, 0, size, 0, Math.PI * 2);
+  ctx.fillStyle = '#f5c518';
+  ctx.fill();
+  ctx.strokeStyle = '#c8a000';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
 
-    // suit lower half (light grey, replacing blue overalls)
-    ctx.beginPath();
-    ctx.arc(0, size * 0.3, size * 0.7, 0.1, Math.PI - 0.1);
-    ctx.fillStyle = '#d0d0d0';
-    ctx.fill();
+  // overalls
+  ctx.beginPath();
+  ctx.arc(0, size * 0.3, size * 0.7, 0.1, Math.PI - 0.1);
+  ctx.fillStyle = '#4466cc';
+  ctx.fill();
 
-    // chest pack with indicator lights
-    ctx.fillStyle = '#3355aa';
-    ctx.fillRect(-size * 0.22, size * 0.07, size * 0.44, size * 0.2);
-    ctx.fillStyle = '#ff5555';
-    ctx.fillRect(-size * 0.17, size * 0.11, size * 0.09, size * 0.08);
-    ctx.fillStyle = '#55ff55';
-    ctx.fillRect(-size * 0.04, size * 0.11, size * 0.09, size * 0.08);
+  // goggle strap
+  ctx.beginPath();
+  ctx.rect(-size, -size * 0.15, size * 2, size * 0.28);
+  ctx.fillStyle = '#333';
+  ctx.fill();
 
-    // goggle strap
-    ctx.beginPath();
-    ctx.rect(-size, -size * 0.15, size * 2, size * 0.28);
-    ctx.fillStyle = '#333';
-    ctx.fill();
+  // goggle
+  ctx.beginPath();
+  ctx.arc(0, -size * 0.05, size * 0.42, 0, Math.PI * 2);
+  ctx.fillStyle = '#aaccff';
+  ctx.fill();
+  ctx.strokeStyle = '#888';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
 
-    // goggle
-    ctx.beginPath();
-    ctx.arc(0, -size * 0.05, size * 0.42, 0, Math.PI * 2);
-    ctx.fillStyle = '#aaccff';
-    ctx.fill();
-    ctx.strokeStyle = '#888';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
+  // pupil
+  let pupilX = 0, pupilY = -size * 0.05;
+  if (expr === 'shocked') { pupilX =  size * 0.1;  pupilY = -size * 0.1; }
+  if (expr === 'scared')  { pupilX = -size * 0.08; pupilY = 0; }
+  ctx.beginPath();
+  ctx.arc(pupilX, pupilY, size * 0.18, 0, Math.PI * 2);
+  ctx.fillStyle = '#111';
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(pupilX + size * 0.06, pupilY - size * 0.06, size * 0.05, 0, Math.PI * 2);
+  ctx.fillStyle = 'white';
+  ctx.fill();
 
-    // pupil
-    let pupilX = 0, pupilY = -size * 0.05;
-    if (expr === 'shocked') { pupilX =  size * 0.1;  pupilY = -size * 0.1; }
-    if (expr === 'scared')  { pupilX = -size * 0.08; pupilY = 0; }
-    ctx.beginPath();
-    ctx.arc(pupilX, pupilY, size * 0.18, 0, Math.PI * 2);
-    ctx.fillStyle = '#111';
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(pupilX + size * 0.06, pupilY - size * 0.06, size * 0.05, 0, Math.PI * 2);
-    ctx.fillStyle = 'white';
-    ctx.fill();
-
-    // mouth
-    ctx.beginPath();
-    if (expr === 'happy') {
-      ctx.arc(0, size * 0.38, size * 0.22, 0, Math.PI);
-      ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5; ctx.stroke();
-    } else if (expr === 'shocked' || expr === 'scared') {
-      ctx.arc(0, size * 0.42, size * 0.15, 0, Math.PI * 2);
-      ctx.fillStyle = '#333'; ctx.fill();
-    } else {
-      ctx.moveTo(-size * 0.18, size * 0.42);
-      ctx.lineTo( size * 0.18, size * 0.42);
-      ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5; ctx.stroke();
-    }
-
-    // white suit arms with round gloves
-    if (expr === 'shocked' || expr === 'scared') {
-      ctx.strokeStyle = '#e0e0e0'; ctx.lineWidth = size * 0.22; ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(-size * 0.8, -size * 0.2);
-      ctx.lineTo(-size * 0.4,  size * 0.1);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo( size * 0.8, -size * 0.2);
-      ctx.lineTo( size * 0.4,  size * 0.1);
-      ctx.stroke();
-      ctx.fillStyle = '#bbb';
-      ctx.beginPath(); ctx.arc(-size * 0.4, size * 0.1, size * 0.13, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc( size * 0.4, size * 0.1, size * 0.13, 0, Math.PI * 2); ctx.fill();
-    }
-
-    // helmet dome (drawn last — glass over everything)
-    ctx.beginPath();
-    ctx.arc(0, 0, size * 1.05, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(210, 235, 255, 0.13)';
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(180, 215, 255, 0.8)';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // dome shine highlight
-    ctx.beginPath();
-    ctx.arc(-size * 0.3, -size * 0.55, size * 0.2, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.22)';
-    ctx.fill();
-
+  // mouth
+  ctx.beginPath();
+  if (expr === 'happy') {
+    ctx.arc(0, size * 0.38, size * 0.22, 0, Math.PI);
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5; ctx.stroke();
+  } else if (expr === 'shocked' || expr === 'scared') {
+    ctx.arc(0, size * 0.42, size * 0.15, 0, Math.PI * 2);
+    ctx.fillStyle = '#333'; ctx.fill();
   } else {
-    // body
+    ctx.moveTo(-size * 0.18, size * 0.42);
+    ctx.lineTo( size * 0.18, size * 0.42);
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5; ctx.stroke();
+  }
+
+  // arms flailing
+  if (expr === 'shocked' || expr === 'scared') {
+    ctx.strokeStyle = '#f5c518'; ctx.lineWidth = size * 0.18; ctx.lineCap = 'round';
     ctx.beginPath();
-    ctx.arc(0, 0, size, 0, Math.PI * 2);
-    ctx.fillStyle = '#f5c518';
+    ctx.moveTo(-size * 0.8, -size * 0.2);
+    ctx.lineTo(-size * 0.4,  size * 0.1);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo( size * 0.8, -size * 0.2);
+    ctx.lineTo( size * 0.4,  size * 0.1);
+    ctx.stroke();
+  }
+
+  if (spaceSuit) {
+    // transparent circular dome around the minion
+    const domeR = size * 1.5;
+    ctx.beginPath();
+    ctx.arc(0, 0, domeR, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(180, 220, 255, 0.12)';
     ctx.fill();
-    ctx.strokeStyle = '#c8a000';
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = 'rgba(160, 210, 255, 0.85)';
+    ctx.lineWidth = 2.5;
     ctx.stroke();
 
-    // overalls
+    // shine highlight
     ctx.beginPath();
-    ctx.arc(0, size * 0.3, size * 0.7, 0.1, Math.PI - 0.1);
-    ctx.fillStyle = '#4466cc';
+    ctx.arc(-domeR * 0.35, -domeR * 0.45, domeR * 0.18, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
     ctx.fill();
-
-    // goggle strap
-    ctx.beginPath();
-    ctx.rect(-size, -size * 0.15, size * 2, size * 0.28);
-    ctx.fillStyle = '#333';
-    ctx.fill();
-
-    // goggle
-    ctx.beginPath();
-    ctx.arc(0, -size * 0.05, size * 0.42, 0, Math.PI * 2);
-    ctx.fillStyle = '#aaccff';
-    ctx.fill();
-    ctx.strokeStyle = '#888';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // pupil
-    let pupilX = 0, pupilY = -size * 0.05;
-    if (expr === 'shocked') { pupilX =  size * 0.1;  pupilY = -size * 0.1; }
-    if (expr === 'scared')  { pupilX = -size * 0.08; pupilY = 0; }
-    ctx.beginPath();
-    ctx.arc(pupilX, pupilY, size * 0.18, 0, Math.PI * 2);
-    ctx.fillStyle = '#111';
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(pupilX + size * 0.06, pupilY - size * 0.06, size * 0.05, 0, Math.PI * 2);
-    ctx.fillStyle = 'white';
-    ctx.fill();
-
-    // mouth
-    ctx.beginPath();
-    if (expr === 'happy') {
-      ctx.arc(0, size * 0.38, size * 0.22, 0, Math.PI);
-      ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5; ctx.stroke();
-    } else if (expr === 'shocked' || expr === 'scared') {
-      ctx.arc(0, size * 0.42, size * 0.15, 0, Math.PI * 2);
-      ctx.fillStyle = '#333'; ctx.fill();
-    } else {
-      ctx.moveTo(-size * 0.18, size * 0.42);
-      ctx.lineTo( size * 0.18, size * 0.42);
-      ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5; ctx.stroke();
-    }
-
-    // arms flailing
-    if (expr === 'shocked' || expr === 'scared') {
-      ctx.strokeStyle = '#f5c518'; ctx.lineWidth = size * 0.18; ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(-size * 0.8, -size * 0.2);
-      ctx.lineTo(-size * 0.4,  size * 0.1);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo( size * 0.8, -size * 0.2);
-      ctx.lineTo( size * 0.4,  size * 0.1);
-      ctx.stroke();
-    }
   }
 
   ctx.restore();
