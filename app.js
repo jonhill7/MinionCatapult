@@ -232,4 +232,6 @@ requestAnimationFrame(() => {
   simState  = { ...createInitialState(0), theme: planets[0].theme, planet: planets[0].name, angleRad: parseFloat(els.angle.value) * Math.PI / 180, speed: parseFloat(els.speed.value) };
   drawSimFrame(simCtx, simCanvas, simState);
   updateFormula();
+  const newtonCtx = document.getElementById('newton-canvas').getContext('2d');
+  drawNewtonMinion(newtonCtx, 40, 62, 18);
 });

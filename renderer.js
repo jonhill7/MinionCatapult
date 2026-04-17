@@ -106,6 +106,108 @@ function drawMinion(ctx, x, y, size, expr, angle, spaceSuit) {
   ctx.restore();
 }
 
+function drawNewtonMinion(ctx, x, y, size) {
+  ctx.save();
+  ctx.translate(x, y);
+
+  // wig back layer (side curls + top mass, drawn before body)
+  ctx.fillStyle = '#ece6db';
+  ctx.beginPath();
+  ctx.ellipse(-size * 0.92, size * 0.05, size * 0.3, size * 0.55, -0.15, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(size * 0.92, size * 0.05, size * 0.3, size * 0.55, 0.15, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(0, -size * 0.5, size * 0.92, Math.PI, 0);
+  ctx.fill();
+
+  // body
+  ctx.beginPath();
+  ctx.arc(0, 0, size, 0, Math.PI * 2);
+  ctx.fillStyle = '#f5c518';
+  ctx.fill();
+  ctx.strokeStyle = '#c8a000';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // dark coat (instead of overalls)
+  ctx.beginPath();
+  ctx.arc(0, size * 0.3, size * 0.7, 0.1, Math.PI - 0.1);
+  ctx.fillStyle = '#1c1c2e';
+  ctx.fill();
+
+  // wig front (sits over the top portion of the face)
+  ctx.fillStyle = '#ece6db';
+  ctx.beginPath();
+  ctx.arc(0, -size * 0.32, size * 0.8, Math.PI, 0);
+  ctx.fill();
+  // curl texture lines
+  ctx.strokeStyle = '#cec8bc';
+  ctx.lineWidth = 1;
+  for (let i = -1; i <= 1; i++) {
+    ctx.beginPath();
+    ctx.arc(i * size * 0.28, -size * 0.46, size * 0.16, 0.1, Math.PI - 0.1);
+    ctx.stroke();
+  }
+
+  // goggle strap
+  ctx.beginPath();
+  ctx.rect(-size, -size * 0.15, size * 2, size * 0.28);
+  ctx.fillStyle = '#333';
+  ctx.fill();
+
+  // goggle
+  ctx.beginPath();
+  ctx.arc(0, -size * 0.05, size * 0.42, 0, Math.PI * 2);
+  ctx.fillStyle = '#aaccff';
+  ctx.fill();
+  ctx.strokeStyle = '#888';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // pupil (looking slightly up, as if pondering)
+  ctx.beginPath();
+  ctx.arc(size * 0.04, -size * 0.1, size * 0.18, 0, Math.PI * 2);
+  ctx.fillStyle = '#111';
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(size * 0.1, -size * 0.16, size * 0.05, 0, Math.PI * 2);
+  ctx.fillStyle = 'white';
+  ctx.fill();
+
+  // mouth (slight knowing smile)
+  ctx.beginPath();
+  ctx.arc(0, size * 0.33, size * 0.18, 0.15, Math.PI - 0.15);
+  ctx.strokeStyle = '#333';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // apple resting on top of wig
+  const ax = size * 0.42, ay = -size * 1.18;
+  ctx.beginPath();
+  ctx.arc(ax, ay, size * 0.17, 0, Math.PI * 2);
+  ctx.fillStyle = '#dd2222';
+  ctx.fill();
+  ctx.strokeStyle = '#aa1111';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  // stem
+  ctx.beginPath();
+  ctx.moveTo(ax, ay - size * 0.17);
+  ctx.quadraticCurveTo(ax + size * 0.07, ay - size * 0.32, ax + size * 0.03, ay - size * 0.36);
+  ctx.strokeStyle = '#553300';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  // leaf
+  ctx.beginPath();
+  ctx.ellipse(ax + size * 0.13, ay - size * 0.28, size * 0.1, size * 0.055, 0.6, 0, Math.PI * 2);
+  ctx.fillStyle = '#339933';
+  ctx.fill();
+
+  ctx.restore();
+}
+
 function drawCatapult(ctx, x, y, armAngle) {
   ctx.save();
   ctx.translate(x, y);

@@ -14,7 +14,11 @@ body { font-family: var(--font-sans); }
 .stat-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 2px; }
 .stat-value { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
 #bottom-panel { background: var(--color-background-primary); border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); border-top: none; padding: 12px 16px; display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
-#formula-bar { flex-basis: 100%; margin-top: 4px; padding-top: 8px; border-top: 0.5px solid var(--color-border-tertiary); font-size: 20px; font-family: monospace; color: var(--color-text-secondary); letter-spacing: 0.02em; }
+#formula-row { flex-basis: 100%; margin-top: 4px; padding-top: 8px; border-top: 0.5px solid var(--color-border-tertiary); display: flex; align-items: center; gap: 0; }
+#newton-canvas { flex-shrink: 0; }
+#formula-bar { position: relative; background: var(--color-background-primary); border: 1.5px solid var(--color-border-secondary, #ccc); border-radius: 12px; padding: 8px 14px; font-size: 18px; font-family: monospace; color: var(--color-text-primary); letter-spacing: 0.02em; }
+#formula-bar::before { content: ''; position: absolute; right: 100%; bottom: 22px; border: 8px solid transparent; border-right-color: var(--color-border-secondary, #ccc); }
+#formula-bar::after { content: ''; position: absolute; right: calc(100% - 1px); bottom: 23px; border: 7px solid transparent; border-right-color: var(--color-background-primary, white); }
 .param-group { display: flex; flex-direction: column; gap: 4px; min-width: 120px; flex: 1; }
 .param-label { font-size: 11px; color: var(--color-text-secondary); display: flex; justify-content: space-between; }
 .param-label span { font-weight: 500; color: var(--color-text-primary); }
