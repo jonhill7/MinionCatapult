@@ -211,7 +211,7 @@ els.launchBtn.addEventListener('click', () => {
     hoopAtApex: false,
   };
 
-  resetChart(trajChart, v0, h0, angleRad, g);
+  resetChart(trajChart, v0, h0, angleRad, g, { basketX: simState.basketX, hoopX: simState.hoopX, hoopY: simState.hoopY });
 
   els.statS.textContent      = 'flying!';
   els.statS.style.color      = '#4CAF50';
@@ -227,7 +227,8 @@ function doReset() {
   prevTime = null;
   simState = { ...createInitialState(0), theme: planets[els.planet.selectedIndex].theme, planet: planets[els.planet.selectedIndex].name, angleRad: parseFloat(els.angle.value) * Math.PI / 180, speed: parseFloat(els.speed.value), basketX: parseFloat(els.basketDist.value), hoopX: parseFloat(els.hoopDist.value) || 0, hoopY: parseFloat(els.hoopHeight.value) || 0, hoopPassed: false, hoopPassT: null };
   resetChart(trajChart, parseFloat(els.speed.value), 0,
-    parseFloat(els.angle.value) * Math.PI / 180, parseFloat(els.planet.value));
+    parseFloat(els.angle.value) * Math.PI / 180, parseFloat(els.planet.value),
+    { basketX: simState.basketX, hoopX: simState.hoopX, hoopY: simState.hoopY });
   els.statS.textContent       = 'ready';
   els.statS.style.color       = '#e86b2a';
   els.launchBtn.style.display  = 'inline-block';
