@@ -24,6 +24,9 @@ const els = {
   statMH:     document.getElementById('stat-mh'),
   statS:      document.getElementById('stat-s'),
   formulaBar: document.getElementById('formula-bar'),
+  basketDist: document.getElementById('basket-dist'),
+  hoopDist:   document.getElementById('hoop-dist'),
+  hoopHeight: document.getElementById('hoop-height'),
 };
 
 // --- Populate planet select from JSON ---
@@ -79,12 +82,35 @@ function simulate(timestamp) {
   prevTime = timestamp;
 
   if (!simState.landed) {
+    const prevWx = simState.wx;
+    const prevWy = simState.wy;
     const justLanded = updatePhysics(simState, dt);
+
+    if (!simState.hoopPassed && simState.hoopX > 0 && simState.hoopY > 0) {
+      if (prevWx < simState.hoopX && simState.wx >= simState.hoopX) {
+        const frac    = (simState.hoopX - prevWx) / (simState.wx - prevWx);
+        const wyCross = prevWy + frac * (simState.wy - prevWy);
+        if (Math.abs(wyCross - simState.hoopY) <= 3) {
+          const theoreticalMaxH = (simState.vy0 * simState.vy0) / (2 * simState.g);
+          simState.hoopPassed = true;
+          simState.hoopPassT  = simState.t;
+          simState.hoopAtApex = wyCross >= theoreticalMaxH * 0.85;
+        }
+      }
+    }
+
     if (justLanded) {
-      els.statS.textContent      = 'landed!';
-      els.statS.style.color      = '#e82a2a';
-      els.resetBtn.style.display  = 'inline-block';
-      els.stopBtn.style.display   = 'none';
+      const CATCH_RADIUS = 3;
+      simState.caught = Math.abs(simState.landX - simState.basketX) <= CATCH_RADIUS;
+      if (simState.caught) {
+        els.statS.textContent = 'caught!';
+        els.statS.style.color = '#4CAF50';
+      } else {
+        els.statS.textContent = 'landed!';
+        els.statS.style.color = '#e82a2a';
+      }
+      els.resetBtn.style.display = 'inline-block';
+      els.stopBtn.style.display  = 'none';
     }
   }
 
@@ -129,6 +155,24 @@ els.speed.addEventListener('input', e => {
   }
   updateFormula();
 });
+els.basketDist.addEventListener('change', e => {
+  if (simState && !simState.launched) {
+    simState.basketX = parseFloat(e.target.value) || 0;
+    drawSimFrame(simCtx, simCanvas, simState);
+  }
+});
+els.hoopDist.addEventListener('change', e => {
+  if (simState && !simState.launched) {
+    simState.hoopX = parseFloat(e.target.value) || 0;
+    drawSimFrame(simCtx, simCanvas, simState);
+  }
+});
+els.hoopHeight.addEventListener('change', e => {
+  if (simState && !simState.launched) {
+    simState.hoopY = parseFloat(e.target.value) || 0;
+    drawSimFrame(simCtx, simCanvas, simState);
+  }
+});
 els.planet.addEventListener('change', e => {
   const p = planets[e.target.selectedIndex];
   els.lblPlanet.textContent = p.name;
@@ -158,6 +202,13 @@ els.launchBtn.addEventListener('click', () => {
     planet: planets[els.planet.selectedIndex].name,
     angleRad,
     launched: true,
+    basketX:    parseFloat(els.basketDist.value),
+    hoopX:      parseFloat(els.hoopDist.value)   || 0,
+    hoopY:      parseFloat(els.hoopHeight.value) || 0,
+    vy0:        v0 * Math.sin(angleRad),
+    hoopPassed: false,
+    hoopPassT:  null,
+    hoopAtApex: false,
   };
 
   resetChart(trajChart, v0, h0, angleRad, g);
@@ -174,7 +225,7 @@ els.launchBtn.addEventListener('click', () => {
 function doReset() {
   if (animId) { cancelAnimationFrame(animId); animId = null; }
   prevTime = null;
-  simState = { ...createInitialState(0), theme: planets[els.planet.selectedIndex].theme, planet: planets[els.planet.selectedIndex].name, angleRad: parseFloat(els.angle.value) * Math.PI / 180, speed: parseFloat(els.speed.value) };
+  simState = { ...createInitialState(0), theme: planets[els.planet.selectedIndex].theme, planet: planets[els.planet.selectedIndex].name, angleRad: parseFloat(els.angle.value) * Math.PI / 180, speed: parseFloat(els.speed.value), basketX: parseFloat(els.basketDist.value), hoopX: parseFloat(els.hoopDist.value) || 0, hoopY: parseFloat(els.hoopHeight.value) || 0, hoopPassed: false, hoopPassT: null };
   resetChart(trajChart, parseFloat(els.speed.value), 0,
     parseFloat(els.angle.value) * Math.PI / 180, parseFloat(els.planet.value));
   els.statS.textContent       = 'ready';
@@ -245,7 +296,7 @@ makeDraggable(
 requestAnimationFrame(() => {
   resizeCanvases();
   trajChart = initChart(trajCtx);
-  simState  = { ...createInitialState(0), theme: planets[0].theme, planet: planets[0].name, angleRad: parseFloat(els.angle.value) * Math.PI / 180, speed: parseFloat(els.speed.value) };
+  simState  = { ...createInitialState(0), theme: planets[0].theme, planet: planets[0].name, angleRad: parseFloat(els.angle.value) * Math.PI / 180, speed: parseFloat(els.speed.value), basketX: parseFloat(els.basketDist.value), hoopX: parseFloat(els.hoopDist.value) || 0, hoopY: parseFloat(els.hoopHeight.value) || 0, hoopPassed: false, hoopPassT: null };
   drawSimFrame(simCtx, simCanvas, simState);
   updateFormula();
   newtonCtx = document.getElementById('newton-canvas').getContext('2d');

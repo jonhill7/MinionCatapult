@@ -33,5 +33,6 @@ Chart.js is loaded via CDN in `index.html`.
 - **renderer.js is pure**: drawing functions take explicit arguments, never touch the DOM or global state.
 - **physics.js is pure**: no rendering or DOM side effects.
 - **app.js owns state**: `simState` is the single source of truth; all other modules read from it.
-- The Newton minion (bottom panel) is drawn on a small fixed canvas (`#newton-canvas`, 80×90px) and redrawn on each animation frame with an expression derived from `simState`.
+- The Newton minion (bottom panel) is drawn on a small fixed canvas (`#newton-canvas`, 80×90px) and redrawn on each animation frame. He has four expressions driven by `simState`: `idle` (ready), `excited` (ascending), `worried` (descending), `aha` (landed). He wears a powdered wig and has a red apple in the lower-right corner of his canvas.
 - The spacesuit (shown on non-Earth planets) is drawn as a transparent circular dome overlaid on the normal yellow minion — not a separate character.
+- After landing, the Launch button is replaced by a Reset button, which returns the minion to the catapult and clears the chart. The Stop button is only visible while the minion is in flight.

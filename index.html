@@ -35,6 +35,18 @@
       <div class="param-label">launch speed <span id="lbl-speed">25 m/s</span></div>
       <input type="range" id="speed" min="5" max="80" value="25" step="1">
     </div>
+    <div class="param-group">
+      <div class="param-label">basket distance (m)</div>
+      <input type="number" id="basket-dist" min="1" max="9999" value="60" step="1" style="width:80px">
+    </div>
+    <div class="param-group">
+      <div class="param-label">hoop distance (m)</div>
+      <input type="number" id="hoop-dist" min="1" max="9999" step="1" style="width:80px" placeholder="—">
+    </div>
+    <div class="param-group">
+      <div class="param-label">hoop height (m)</div>
+      <input type="number" id="hoop-height" min="1" max="9999" step="1" style="width:80px" placeholder="—">
+    </div>
     <button id="launch-btn">Launch!</button>
     <button id="stop-btn">Stop</button>
     <button id="reset-btn">Reset</button>

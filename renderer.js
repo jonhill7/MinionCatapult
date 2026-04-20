@@ -232,6 +232,69 @@ function drawNewtonMinion(ctx, x, y, size, expr = 'idle') {
   ctx.restore();
 }
 
+function drawBasket(ctx, sx, screenGroundY, pxHalfW, caught) {
+  const bw = pxHalfW;
+  const bh = Math.max(bw * 0.75, 14);
+  const top = screenGroundY - bh;
+
+  // body trapezoid (wider at top, narrower at bottom)
+  ctx.beginPath();
+  ctx.moveTo(sx - bw * 0.78, screenGroundY);
+  ctx.lineTo(sx + bw * 0.78, screenGroundY);
+  ctx.lineTo(sx + bw,        top);
+  ctx.lineTo(sx - bw,        top);
+  ctx.closePath();
+  ctx.fillStyle = caught ? 'rgba(255,215,50,0.92)' : 'rgba(175,105,35,0.88)';
+  ctx.fill();
+  ctx.strokeStyle = caught ? '#aa7700' : '#6a3808';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // weave lines
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = caught ? 'rgba(160,100,0,0.55)' : 'rgba(90,45,8,0.45)';
+  for (let i = 1; i <= 3; i++) {
+    const frac = i / 4;
+    const ly  = top + bh * frac;
+    const lw  = bw * 0.78 + bw * (1 - 0.78) * (1 - frac);
+    ctx.beginPath(); ctx.moveTo(sx - lw, ly); ctx.lineTo(sx + lw, ly); ctx.stroke();
+  }
+
+  // oval rim
+  ctx.beginPath();
+  ctx.ellipse(sx, top, bw, bw * 0.22, 0, 0, Math.PI * 2);
+  ctx.fillStyle = caught ? 'rgba(220,165,30,0.95)' : 'rgba(130,75,18,0.95)';
+  ctx.fill();
+  ctx.strokeStyle = caught ? '#996600' : '#4e2a04';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+}
+
+function drawCelebration(ctx, sx, screenGroundY, bw) {
+  const colors = ['#f5c518', '#e82a2a', '#4CAF50', '#2196F3', '#FF9800', '#e040fb'];
+  for (let i = 0; i < 14; i++) {
+    const angle = (i / 14) * Math.PI * 2;
+    const dist  = bw + 18 + (i % 3) * 14;
+    const px    = sx + Math.cos(angle) * dist;
+    const py    = screenGroundY - bw * 0.75 + Math.sin(angle) * dist * 0.5;
+    ctx.beginPath();
+    ctx.arc(px, py, 4.5, 0, Math.PI * 2);
+    ctx.fillStyle = colors[i % colors.length];
+    ctx.fill();
+  }
+
+  const ty = screenGroundY - bw * 0.75 - 28;
+  ctx.font = 'bold 26px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'bottom';
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+  ctx.strokeText('CAUGHT!', sx, ty);
+  ctx.fillStyle = '#f5c518';
+  ctx.fillText('CAUGHT!', sx, ty);
+}
+
 function drawCatapult(ctx, x, y, armAngle) {
   ctx.save();
   ctx.translate(x, y);
@@ -467,6 +530,113 @@ function drawLaunchArrow(ctx, x, y, angleRad, speed) {
   ctx.restore();
 }
 
+function drawHoopBack(ctx, sx, sy, pxR, screenGroundY, passed) {
+  const strokeW = Math.max(5, pxR * 0.16);
+
+  // support pole
+  ctx.beginPath();
+  ctx.moveTo(sx, screenGroundY);
+  ctx.lineTo(sx, sy + pxR);
+  ctx.strokeStyle = passed ? '#886600' : '#777';
+  ctx.lineWidth = Math.max(3, strokeW * 0.5);
+  ctx.stroke();
+
+  // back (top) arc — dimmer to suggest depth
+  ctx.beginPath();
+  ctx.arc(sx, sy, pxR, Math.PI, 0);
+  ctx.strokeStyle = passed ? 'rgba(170,120,0,0.65)' : 'rgba(150,60,10,0.65)';
+  ctx.lineWidth = strokeW;
+  ctx.stroke();
+}
+
+function drawHoopFront(ctx, sx, sy, pxR, passed, animT, atApex) {
+  const strokeW = Math.max(5, pxR * 0.16);
+
+  // front (bottom) arc
+  ctx.beginPath();
+  ctx.arc(sx, sy, pxR, 0, Math.PI);
+  ctx.strokeStyle = !passed ? '#ff6600' : atApex ? '#ffcc00' : '#ff8c00';
+  ctx.lineWidth = strokeW;
+  ctx.stroke();
+
+  if (animT < 0) return;
+
+  if (atApex) {
+    // full celebration — gold
+    [0, 0.22, 0.44].forEach(offset => {
+      const t = animT - offset;
+      if (t >= 0 && t < 0.75) {
+        const prog  = t / 0.75;
+        ctx.beginPath();
+        ctx.arc(sx, sy, pxR * (1 + prog * 1.8), 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255,215,0,${(1 - prog) * 0.9})`;
+        ctx.lineWidth = Math.max(3, strokeW * 0.7);
+        ctx.stroke();
+      }
+    });
+
+    if (animT < 0.55) {
+      const alpha  = 1 - animT / 0.55;
+      const colors = ['#f5c518','#e82a2a','#4CAF50','#2196F3','#FF9800','#e040fb'];
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      for (let i = 0; i < 12; i++) {
+        const angle = (i / 12) * Math.PI * 2;
+        const dist  = pxR * (0.4 + animT * 4.5);
+        ctx.beginPath();
+        ctx.arc(sx + Math.cos(angle) * dist, sy + Math.sin(angle) * dist, 4.5, 0, Math.PI * 2);
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    if (animT < 1.1) {
+      const prog  = Math.max(0, animT - 0.05);
+      const alpha = prog < 0.3 ? prog / 0.3 : Math.max(0, 1 - (prog - 0.3) / 0.7);
+      const textY = sy - pxR - 12 - animT * 25;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.font = `bold ${Math.max(20, Math.round(pxR * 0.9))}px sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,0.55)';
+      ctx.strokeText('NICE!', sx, textY);
+      ctx.fillStyle = '#f5c518';
+      ctx.fillText('NICE!', sx, textY);
+      ctx.restore();
+    }
+
+  } else {
+    // toned-down — orange, two rings, no text
+    [0, 0.28].forEach(offset => {
+      const t = animT - offset;
+      if (t >= 0 && t < 0.65) {
+        const prog  = t / 0.65;
+        ctx.beginPath();
+        ctx.arc(sx, sy, pxR * (1 + prog * 1.2), 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255,140,0,${(1 - prog) * 0.7})`;
+        ctx.lineWidth = Math.max(2, strokeW * 0.5);
+        ctx.stroke();
+      }
+    });
+
+    if (animT < 0.45) {
+      const alpha = 1 - animT / 0.45;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      for (let i = 0; i < 7; i++) {
+        const angle = (i / 7) * Math.PI * 2;
+        const dist  = pxR * (0.4 + animT * 3.5);
+        ctx.beginPath();
+        ctx.arc(sx + Math.cos(angle) * dist, sy + Math.sin(angle) * dist, 3, 0, Math.PI * 2);
+        ctx.fillStyle = '#ff8c00';
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+  }
+}
+
 /**
  * Renders a complete simulation frame onto the given canvas context.
  * @param {CanvasRenderingContext2D} ctx
@@ -508,6 +678,26 @@ function drawSimFrame(ctx, canvas, state) {
     ctx.setLineDash([]);
   }
 
+  // hoop — back half drawn here so minion passes in front of it
+  const HOOP_RADIUS = 3; // world metres
+  let hoopSx = null, hoopSy = null, hoopPxR = 0;
+  if (s.hoopX > 0 && s.hoopY > 0) {
+    const hp = worldToScreen(s.hoopX, s.hoopY, camX, camY, groundY, scale);
+    hoopSx = hp.sx; hoopSy = hp.sy;
+    hoopPxR = HOOP_RADIUS * scale;
+    drawHoopBack(ctx, hoopSx, hoopSy, hoopPxR, groundY - camY, !!s.hoopPassed);
+  }
+
+  // basket
+  const CATCH_RADIUS = 3; // world metres
+  if (s.basketX) {
+    const bp         = worldToScreen(s.basketX, 0, camX, camY, groundY, scale);
+    const pxHalfW    = CATCH_RADIUS * scale;
+    const screenGndY = groundY - camY + 18;
+    drawBasket(ctx, bp.sx, screenGndY, pxHalfW, !!s.caught);
+    if (s.caught) drawCelebration(ctx, bp.sx, screenGndY, pxHalfW);
+  }
+
   // landing marker
   if (s.landed && s.landX !== null) {
     const lp = worldToScreen(s.landX, 0, camX, camY, groundY, scale);
@@ -525,6 +715,12 @@ function drawSimFrame(ctx, canvas, state) {
     const velAngle = s.launched ? Math.atan2(-s.vy, s.vx) : -Math.PI / 4;
     const expr     = getExpression(s.vy, s.launched, s.landed);
     drawMinion(ctx, mp.sx, mp.sy, 18, expr, s.launched ? velAngle * 0.3 : 0, s.planet !== 'Earth');
+  }
+
+  // hoop — front half drawn after minion so it overlaps (3D through-ring feel)
+  if (hoopSx !== null) {
+    const animT = s.hoopPassed ? s.t - s.hoopPassT : -1;
+    drawHoopFront(ctx, hoopSx, hoopSy, hoopPxR, !!s.hoopPassed, animT, !!s.hoopAtApex);
   }
 
   // speed bar
