@@ -1,7 +1,26 @@
 
 <link rel="stylesheet" href="style.css">
 
+<!-- Lesson navigation sidebar (slide-in overlay) -->
+<div id="lesson-sidebar">
+  <div id="sidebar-header">
+    <span class="sidebar-title">Algebra 2: Quadratics</span>
+    <button id="close-sidebar" aria-label="Close">✕</button>
+  </div>
+  <div id="sidebar-content"><!-- populated by JS --></div>
+</div>
+<div id="sidebar-backdrop"></div>
+
 <div id="app">
+
+  <!-- Top navigation bar -->
+  <div id="nav-bar">
+    <button id="menu-btn" aria-label="Open lesson menu">☰</button>
+    <span class="nav-brand">Minion Catapult</span>
+    <span id="nav-mode-label">Free Play</span>
+  </div>
+
+  <!-- Simulation + chart area -->
   <div id="top">
     <div id="sim-panel">
       <canvas id="sim-canvas"></canvas>
@@ -11,55 +30,160 @@
       <div id="chart-area">
         <canvas id="traj-canvas"></canvas>
       </div>
-      <div id="stats-area">
-        <div class="stat-card"><div class="stat-label">height</div><div class="stat-value" id="stat-h">0 m</div></div>
-        <div class="stat-card"><div class="stat-label">speed</div><div class="stat-value" id="stat-v">0 m/s</div></div>
-        <div class="stat-card"><div class="stat-label">range</div><div class="stat-value" id="stat-r">0 m</div></div>
-        <div class="stat-card"><div class="stat-label">time</div><div class="stat-value" id="stat-t">0 s</div></div>
-        <div class="stat-card"><div class="stat-label">max height</div><div class="stat-value" id="stat-mh">0 m</div></div>
-        <div class="stat-card"><div class="stat-label">status</div><div class="stat-value" id="stat-s" style="color:#e86b2a">ready</div></div>
+
+      <!-- Info panel: tabs for Equations / Stats / Lesson prompts -->
+      <div id="info-area">
+        <div class="info-tabs">
+          <button class="info-tab active" data-panel="equations">Equations</button>
+          <button class="info-tab" data-panel="stats">Stats</button>
+          <button class="info-tab hidden" data-panel="lesson" id="lesson-tab-btn">Lesson</button>
+        </div>
+
+        <!-- Equations panel -->
+        <div id="panel-equations" class="info-panel">
+          <div class="eq-row" id="eq-row-general">
+            <div class="eq-form-label">General</div>
+            <div class="eq-form-value" id="eq-general-val">y = ax² + bx</div>
+          </div>
+          <div class="eq-row" id="eq-row-vertex">
+            <div class="eq-form-label">Vertex</div>
+            <div class="eq-form-value" id="eq-vertex-val">y = a(x − h)² + k</div>
+          </div>
+          <div class="eq-row" id="eq-row-factored">
+            <div class="eq-form-label">Intercept</div>
+            <div class="eq-form-value" id="eq-factored-val">y = a · x · (x − R)</div>
+          </div>
+          <!-- Circle equations (shown only in circle mode) -->
+          <div class="eq-row hidden" id="eq-row-circle-std">
+            <div class="eq-form-label">Standard</div>
+            <div class="eq-form-value" id="eq-circle-std-val"></div>
+          </div>
+          <div class="eq-row hidden" id="eq-row-circle-exp">
+            <div class="eq-form-label">Expanded</div>
+            <div class="eq-form-value" id="eq-circle-exp-val"></div>
+          </div>
+          <!-- Vertex/axis summary line -->
+          <div class="eq-summary hidden" id="eq-summary">
+            <span id="eq-vertex-coords"></span>
+            <span id="eq-axis-sym"></span>
+            <span id="eq-range"></span>
+          </div>
+        </div>
+
+        <!-- Stats panel -->
+        <div id="panel-stats" class="info-panel hidden">
+          <div class="stat-card"><div class="stat-label">height</div><div class="stat-value" id="stat-h">0 m</div></div>
+          <div class="stat-card"><div class="stat-label">speed</div><div class="stat-value" id="stat-v">0 m/s</div></div>
+          <div class="stat-card"><div class="stat-label">range</div><div class="stat-value" id="stat-r">0 m</div></div>
+          <div class="stat-card"><div class="stat-label">time</div><div class="stat-value" id="stat-t">0 s</div></div>
+          <div class="stat-card"><div class="stat-label">max height</div><div class="stat-value" id="stat-mh">0 m</div></div>
+          <div class="stat-card"><div class="stat-label">status</div><div class="stat-value" id="stat-s" style="color:#e86b2a">ready</div></div>
+        </div>
+
+        <!-- Lesson prompts panel -->
+        <div id="panel-lesson" class="info-panel hidden">
+          <div id="prompt-text" class="prompt-text"></div>
+          <div class="prompt-nav" id="prompt-nav">
+            <button id="prev-prompt" aria-label="Previous prompt">← Prev</button>
+            <span id="prompt-counter">1 / 1</span>
+            <button id="next-prompt" aria-label="Next prompt">Next →</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+
   <div class="divider" id="h-divider"></div>
+
+  <!-- Bottom control + lesson section -->
   <div id="bottom-panel">
-    <div class="param-group">
-      <div class="param-label">planet <span id="lbl-planet">Earth</span></div>
-      <select id="planet"></select>
+
+    <!-- Left: simulation controls -->
+    <div id="controls-section">
+      <div class="param-group">
+        <div class="param-label">planet <span id="lbl-planet">Earth</span></div>
+        <select id="planet"></select>
+      </div>
+      <div class="param-group">
+        <div class="param-label">launch angle <span id="lbl-angle">45°</span></div>
+        <input type="range" id="angle" min="10" max="85" value="45" step="1">
+      </div>
+      <div class="param-group">
+        <div class="param-label">launch speed <span id="lbl-speed">25 m/s</span></div>
+        <input type="range" id="speed" min="5" max="80" value="25" step="1">
+      </div>
+      <div class="param-group" id="target-h-group" style="display:none">
+        <div class="param-label">target height <span id="lbl-target-h">10 m</span></div>
+        <input type="range" id="target-h" min="0" max="120" value="10" step="1">
+      </div>
+      <div class="param-group">
+        <div class="param-label">basket distance (m)</div>
+        <input type="number" id="basket-dist" min="1" max="9999" value="60" step="1" style="width:80px">
+      </div>
+      <div class="param-group">
+        <div class="param-label">hoop distance (m)</div>
+        <input type="number" id="hoop-dist" min="1" max="9999" step="1" style="width:80px" placeholder="—">
+      </div>
+      <div class="param-group">
+        <div class="param-label">hoop height (m)</div>
+        <input type="number" id="hoop-height" min="1" max="9999" step="1" style="width:80px" placeholder="—">
+      </div>
+      <!-- Circle mode controls (lesson 7 only) -->
+      <div id="circle-controls" style="display:none">
+        <div class="param-group">
+          <div class="param-label">center h <span id="lbl-circle-h">3.0</span></div>
+          <input type="range" id="circle-h" min="-10" max="10" value="3" step="0.5">
+        </div>
+        <div class="param-group">
+          <div class="param-label">center k <span id="lbl-circle-k">2.0</span></div>
+          <input type="range" id="circle-k" min="-10" max="10" value="2" step="0.5">
+        </div>
+        <div class="param-group">
+          <div class="param-label">radius r <span id="lbl-circle-r">5.0</span></div>
+          <input type="range" id="circle-r" min="0.5" max="15" value="5" step="0.5">
+        </div>
+      </div>
+      <button id="launch-btn">Launch!</button>
+      <button id="stop-btn">Stop</button>
+      <button id="reset-btn">Reset</button>
+      <div id="formula-row">
+        <canvas id="newton-canvas" width="80" height="90"></canvas>
+        <div id="disc-panel" style="display:none">
+          <div id="disc-label"></div>
+          <div id="disc-detail"></div>
+        </div>
+      </div>
     </div>
-    <div class="param-group">
-      <div class="param-label">launch angle <span id="lbl-angle">45°</span></div>
-      <input type="range" id="angle" min="10" max="85" value="45" step="1">
+
+    <!-- Right: lesson plan / teacher notes (visible in lesson mode) -->
+    <div id="lesson-section" style="display:none">
+      <div id="lesson-section-header">
+        <div id="lesson-section-title"></div>
+        <span id="lesson-section-badge" class="activity-badge"></span>
+      </div>
+      <div id="lesson-section-desc"></div>
+      <details id="lesson-targets-details">
+        <summary>Learning Targets</summary>
+        <ul id="lesson-targets-list"></ul>
+      </details>
+      <details id="lesson-plan-details">
+        <summary>Teacher Notes</summary>
+        <div id="lesson-plan-content"></div>
+      </details>
+      <details id="lesson-discussion-details" style="display:none">
+        <summary>Discussion Questions</summary>
+        <ul id="lesson-discussion-list"></ul>
+      </details>
     </div>
-<div class="param-group">
-      <div class="param-label">launch speed <span id="lbl-speed">25 m/s</span></div>
-      <input type="range" id="speed" min="5" max="80" value="25" step="1">
-    </div>
-    <div class="param-group">
-      <div class="param-label">basket distance (m)</div>
-      <input type="number" id="basket-dist" min="1" max="9999" value="60" step="1" style="width:80px">
-    </div>
-    <div class="param-group">
-      <div class="param-label">hoop distance (m)</div>
-      <input type="number" id="hoop-dist" min="1" max="9999" step="1" style="width:80px" placeholder="—">
-    </div>
-    <div class="param-group">
-      <div class="param-label">hoop height (m)</div>
-      <input type="number" id="hoop-height" min="1" max="9999" step="1" style="width:80px" placeholder="—">
-    </div>
-    <button id="launch-btn">Launch!</button>
-    <button id="stop-btn">Stop</button>
-    <button id="reset-btn">Reset</button>
-    <div id="formula-row">
-      <canvas id="newton-canvas" width="80" height="90"></canvas>
-      <div id="formula-bar">y(x) = ?</div>
-    </div>
+
   </div>
 </div>
 
 <script defer src="/_vercel/insights/script.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="planets.js"></script>
+<script src="lessons.js"></script>
+<script src="education.js"></script>
 <script src="physics.js"></script>
 <script src="renderer.js"></script>
 <script src="chart-manager.js"></script>

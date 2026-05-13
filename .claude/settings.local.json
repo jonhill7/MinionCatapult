@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Recurse -Path \"c:\\\\MyStuff\\\\repos\\\\math\\\\MinionCatapult\" -File)",
+      "Bash(Select-Object FullName, Extension)",
+      "Bash(Sort-Object FullName)"
+    ]
+  }
+}
